@@ -1,0 +1,45 @@
+{
+  "name": "playwright",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "allure": "allure generate allure-results -o allure-report --clean && allure open allure-report",
+    "eslint": "npx eslint src/ --fix",
+    "eslint-validation": "npx eslint src/",
+    "allure-cleanup": "rm -rf allure-report && rm -rf allure-results",
+    "all": "npm run allure-cleanup && npm run eslint && npx playwright test",
+    "debug": "npm run allure-cleanup && npm run eslint && npx playwright test --grep @debug",
+    "local:qa-us": "npm run allure-cleanup && npm run eslint && npx playwright test --grep '(?=.*@us)(?=.*@qa).*'",
+    "local:prd-us": "npm run allure-cleanup && npm run eslint && npx playwright test --grep '(?=.*@us)(?=.*@prd).*'",
+    "local:prd-eu": "npm run allure-cleanup && npm run eslint && npx playwright test --grep '(?=.*@eu)(?=.*@prd).*'",
+    "local:prd-ca": "npm run allure-cleanup && npm run eslint && npx playwright test --grep '(?=.*@ca)(?=.*@prd).*'",
+    "docker:qa-us": "npm run allure-cleanup && npm run eslint && xvfb-run npx playwright test --grep '(?=.*@us)(?=.*@qa).*'",
+    "docker:prd-us": "npm run allure-cleanup && npm run eslint && xvfb-run npx playwright test --grep '(?=.*@us)(?=.*@prd).*'",
+    "docker:prd-eu": "npm run allure-cleanup && npm run eslint && xvfb-run npx playwright test --grep '(?=.*@eu)(?=.*@prd).*'",
+    "docker:prd-ca": "npm run allure-cleanup && npm run eslint && xvfb-run npx playwright test --grep '(?=.*@ca)(?=.*@prd).*'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.23.0",
+    "allure-playwright": "^2.0.0-beta.18",
+    "eslint": "^8.20.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.4",
+    "eslint-plugin-promise": "^6.0.0"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "base-64": "^1.0.0",
+    "crypto-js": "^4.1.1",
+    "dotenv": "^16.0.1",
+    "dotenv-flow": "^3.2.0",
+    "expect": "^28.1.1",
+    "form-urlencoded": "^6.1.0",
+    "twilio": "^4.7.1",
+    "uuid": "^8.3.2"
+  }
+}

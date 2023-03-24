@@ -1,0 +1,90 @@
+version: '3'
+services:
+  template-tests: &BASE-TEMPLATE-TESTS
+      image: template-image-path
+      environment:
+         - CI
+         - NODE_ENV
+         - GIT_BRANCH
+         - TEST_ACCOUNT
+         - ACTIVATE_RETRY
+         - ACTIVATE_PARALLEL_WORKERS
+         - PLAYRIWGHT_ACTIVATE_TRACE_main
+         - PLAYRIWGHT_ACTIVATE_TRACE_daily_qa_us
+         - PLAYRIWGHT_ACTIVATE_TRACE_daily_prd_us
+         - PLAYRIWGHT_ACTIVATE_TRACE_daily_prd_ca
+         - PLAYRIWGHT_ACTIVATE_TRACE_daily_prd_eu
+         - USER_EMAIL_routing-auto1-qaus_ADMIN
+         - USER_PASSWORD_routing-auto1-qaus_ADMIN
+         - CLIENT_ID_routing-auto1-qaus
+         - CLIENT_SECRET_routing-auto1-qaus
+
+         - WIREMOCK_USERNAME
+         - WIREMOCK_PASSWORD
+      volumes:
+        - ./playwright-report:/playwright-report
+        - ./allure-report:/allure-report
+        - ./allure-results:/allure-results
+
+  pr-run-qa:
+    <<: *BASE-TEMPLATE-TESTS
+    build:
+      context: .
+    command: npm run docker:pr-run-qa
+
+  pr-run-prd:
+    <<: *BASE-TEMPLATE-TESTS
+    build:
+      context: .
+    command: npm run docker:pr-run-prd
+
+  development-branch:
+    <<: *BASE-TEMPLATE-TESTS
+    build:
+      context: .
+    ## change it accordingly to your need
+    command: npm run docker:prd-ca
+
+  main-run-qa:
+    <<: *BASE-TEMPLATE-TESTS
+    image: template-image-path
+    command: npm run docker:qa-us
+
+  main-run-prd:
+    <<: *BASE-TEMPLATE-TESTS
+    build:
+      context: .
+    command: npm run docker:main-run-prd
+
+
+  TEMPLATE-tests-qa-us:
+    <<: *BASE-TEMPLATE-TESTS
+    command: npm run docker:qa-us
+
+  TEMPLATE-tests-prd-us:
+    <<: *BASE-TEMPLATE-TESTS
+    command: npm run docker:prd-us
+
+  TEMPLATE-tests-prd-eu:
+    <<: *BASE-TEMPLATE-TESTS
+    command: npm run docker:prd-eu
+
+  TEMPLATE-tests-prd-ca:
+    <<: *BASE-TEMPLATE-TESTS
+    command: npm run docker:prd-ca
+
+# Components runs ------------------------------------------
+# It's not working directly in the component pipeline. 
+# It's only to us if we need to simulate a Component X run
+# Because of that we use the "context: ."
+  template-qa-us:
+    <<: *BASE-TEMPLATE-TESTS
+    build:
+      context: .
+    command: npm run docker:template-qa-us
+  template-prd-us:
+    <<: *BASE-TEMPLATE-TESTS
+    build:
+      context: .
+    command: npm run docker:template-prd-us
+# Components runs ------------------------------------------

@@ -1,0 +1,124 @@
+Schedule:
+  daily-qa-us:
+    cron: 0 21 * * *
+    branch: daily-qa-us
+  daily-prd-us:
+    cron: 0 21 * * *
+    branch: daily-prd-us
+  daily-prd-eu:
+    cron: 0 21 * * *
+    branch: daily-prd-eu
+  daily-prd-ca:
+    cron: 0 21 * * *
+    branch: daily-prd-ca
+
+Build phase:
+  stages:
+    Build docker image:
+      when:
+        - main
+      type: docker_build
+
+    Tests validation:
+      when:
+        - main
+      type: tests
+      steps:
+        - ./scripts/pipeline-runner.sh template-account main-run-qa
+      reports_allure:
+        - allure-results
+      report html: ./playwright-report/index.html
+
+    Push docker image:
+      when:
+        - main
+      type: docker_push
+      register_meza_artifact: false
+      docker_image_push_latest_tag: true
+
+    PR-PRD:
+      when:
+        - .*PR-.*
+      type: tests
+      parallel_group: pr-validation
+      steps:
+        - ./scripts/pipeline-runner.sh template-account pr-run-prd
+      reports_allure:
+        - allure-results
+      reports:
+        - playwright-report/results.xml
+      report html: ./playwright-report/index.html
+
+    PR-QA:
+      when:
+        - .*PR-.*
+      type: tests
+      parallel_group: pr-validation
+      steps:
+        - ./scripts/pipeline-runner.sh template-account pr-run-qa
+      reports_allure:
+        - allure-results
+      reports:
+        - playwright-report/results.xml
+      report html: ./playwright-report/index.html
+
+    DEV-branch:
+      when:
+        ## Put the branch you want to test
+        - template-branch
+      type: tests
+      steps:
+        ## Update the account you want to test
+        - ./scripts/pipeline-runner.sh template-account development-branch
+      reports_allure:
+        - allure-results
+
+    PRD-US:
+      when:
+        - daily-prd-us
+      type: tests
+      steps:
+        - ./scripts/pipeline-runner.sh template-account template-prd-us
+      reports_allure:
+        - allure-results
+
+    PRD-EU:
+      when:
+        - daily-prd-eu
+      type: tests
+      steps:
+        - ./scripts/pipeline-runner.sh dceautomationseu template-prd-eu
+      reports_allure:
+        - allure-results
+
+    PRD-CA:
+      when:
+        - daily-prd-ca
+      type: tests
+      steps:
+        - ./scripts/pipeline-runner.sh dceautomationsca template-prd-ca
+      reports_allure:
+        - allure-results
+
+    QA-US:
+      when:
+        - daily-qa-us
+      type: tests
+      steps:
+        - ./scripts/pipeline-runner.sh template-account template-qa-us
+      reports_allure:
+        - allure-results
+
+Notifications:
+  - channels:
+      - template-slack-channel
+    when:
+      - main
+      - daily-qa-us
+      - daily-prd-us
+      - daily-prd-eu
+      - daily-prd-ca
+    status:
+      - ABORTED
+      - BACK_TO_NORMAL
+      - FAILURE
